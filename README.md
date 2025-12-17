@@ -5,7 +5,7 @@ Not really, but it's a good start.
 Follow the instructions [here](https://github.com/insanum/gcalcli) to get gcalcli setup.
 
 ## clone this repo
-`git clone https://github.com/jeffmartin/auto-join-meetings.git`
+`git clone git@github.com:marallyn/auto-join-meetings.git`
 
 ## setup crontab
 Add something like this to your crontab:
