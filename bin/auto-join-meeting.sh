@@ -14,7 +14,7 @@ current_time=$(date +%s)
 meeting_buffer_time=$((current_time + 243))
 
 jq -r '.meetings[] | "\(.time) \(.meet_link) \(.name)"' "$MEETINGS_FILE" 2>/dev/null | while read -r meeting_time meet_link meeting_name; do
-    if [[ $meeting_time -ge $current_time && $meeting_time -le meeting_buffer_time ]]; then
+    if [[ $meeting_time -ge $current_time && $meeting_time -le $meeting_buffer_time ]]; then
 
         today=$(date '+%Y-%m-%d')
         meeting_key="${today}_${meeting_time}_${meet_link}"
@@ -22,7 +22,18 @@ jq -r '.meetings[] | "\(.time) \(.meet_link) \(.name)"' "$MEETINGS_FILE" 2>/dev/
         if ! grep -q "$meeting_key" "$JOINED_FILE"; then
             open "$meet_link"
             echo "$meeting_key" >> "$JOINED_FILE"
-            osascript -e "display notification \"Joining: $meeting_name\" with title \"Meeting Auto-Join\""
+
+            # Nearest whole minute. Anything under 30s reads as "now" rather than
+            # the nonsense "in 0 minutes".
+            minutes_away=$(( (meeting_time - current_time + 30) / 60 ))
+            case $minutes_away in
+                0) countdown="starting now" ;;
+                1) countdown="starting in 1 minute" ;;
+                *) countdown="starting in $minutes_away minutes" ;;
+            esac
+
+            # -- so a title beginning with a dash isn't parsed as a say(1) flag.
+            say -- "$meeting_name $countdown"
         fi
     fi
 done
