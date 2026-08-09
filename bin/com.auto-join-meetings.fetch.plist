@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template. __REPO_DIR__ and __HOME__ are substituted by bin/install.sh;
+     do not load this file directly. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.auto-join-meetings.fetch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__REPO_DIR__/bin/fetch-meetings.sh</string>
+    </array>
+
+    <!-- On the clock at :00 :15 :30 :45, matching the */15 cron this replaced. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Minute</key><integer>15</integer></dict>
+        <dict><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Minute</key><integer>45</integer></dict>
+    </array>
+
+    <!-- Populate the meetings cache immediately at install and at login rather
+         than waiting up to 15 minutes for the first calendar tick. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- The cron line sent all output to /dev/null, so gcalcli auth failures were
+         invisible. Keep them. -->
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/auto-join-meetings/fetch.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/auto-join-meetings/fetch.log</string>
+
+    <!-- launchd's default PATH is /usr/bin:/bin:/usr/sbin:/sbin, which omits
+         Homebrew. The scripts hardcode gcalcli's path today, but don't rely on it. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>

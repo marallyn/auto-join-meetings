@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template. __REPO_DIR__ and __HOME__ are substituted by bin/install.sh;
+     do not load this file directly. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.auto-join-meetings.join</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__REPO_DIR__/bin/auto-join-meeting.sh</string>
+    </array>
+
+    <!-- Every 60s, matching the "* * * * *" cron this replaced. There is no sane
+         StartCalendarInterval equivalent for every-minute short of 60 dict entries.
+         If the Mac sleeps through several intervals, launchd coalesces them into a
+         single catch-up run on wake. -->
+    <key>StartInterval</key>
+    <integer>60</integer>
+
+    <!-- False so installing or logging in can't immediately throw a browser tab at
+         you. The first run happens 60s later regardless. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/auto-join-meetings/join.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/auto-join-meetings/join.log</string>
+
+    <!-- launchd's default PATH is /usr/bin:/bin:/usr/sbin:/sbin. jq, open and
+         osascript all live in /usr/bin, but pin Homebrew ahead of it anyway. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
