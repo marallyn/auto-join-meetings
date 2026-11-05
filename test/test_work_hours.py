@@ -26,10 +26,18 @@ def tsv(*rows):
 
 
 class ExtractOooIntervals(unittest.TestCase):
-    def test_skips_all_day_events(self):
-        # All-day "Home" rows have empty time columns and must be ignored.
+    def test_skips_all_day_non_ooo_events(self):
+        # All-day "Home" working-location rows are not OOO.
         text = tsv("2026-05-26\t\t2026-05-27\t\tHome")
         self.assertEqual(wh.extract_ooo_intervals(text), [])
+
+    def test_all_day_ooo_spans_whole_days_with_exclusive_end(self):
+        # gcalcli's all-day end date is exclusive: 10-31 -> 11-02 covers 10/31 and 11/1.
+        text = tsv("2026-10-31\t\t2026-11-02\t\tOut of office")
+        self.assertEqual(
+            wh.extract_ooo_intervals(text),
+            [(dt("2026-10-31 00:00"), dt("2026-11-02 00:00"))],
+        )
 
     def test_skips_non_ooo_timed_events(self):
         text = tsv("2026-05-26\t11:00\t2026-05-26\t11:30\tJeff / Josh")

@@ -20,8 +20,10 @@ Interval = tuple  # (datetime start, datetime end)
 def extract_ooo_intervals(tsv_text, ooo_title=DEFAULT_OOO_TITLE):
     """Pull OOO intervals out of gcalcli TSV output.
 
-    Columns: start_date, start_time, end_date, end_time, title. All-day events
-    (empty time columns) and events whose title is not the OOO title are skipped.
+    Columns: start_date, start_time, end_date, end_time, title. Events whose
+    title is not the OOO title are skipped. All-day events (empty time columns)
+    run from start_date 00:00 to end_date 00:00; gcalcli's all-day end date is
+    exclusive, so that covers exactly the event's days.
     """
     wanted = ooo_title.strip().lower()
     intervals = []
@@ -32,12 +34,10 @@ def extract_ooo_intervals(tsv_text, ooo_title=DEFAULT_OOO_TITLE):
         start_date, start_time, end_date, end_time, title = fields[:5]
         if start_date == "start_date":  # header row
             continue
-        if not start_time or not end_time:  # all-day event
-            continue
         if title.strip().lower() != wanted:
             continue
-        start = datetime.strptime(f"{start_date} {start_time}", TSV_TIME_FORMAT)
-        end = datetime.strptime(f"{end_date} {end_time}", TSV_TIME_FORMAT)
+        start = datetime.strptime(f"{start_date} {start_time or '00:00'}", TSV_TIME_FORMAT)
+        end = datetime.strptime(f"{end_date} {end_time or '00:00'}", TSV_TIME_FORMAT)
         intervals.append((start, end))
     return intervals
 
