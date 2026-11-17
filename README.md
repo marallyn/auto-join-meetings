@@ -52,3 +52,20 @@ Adjust this line of auto-join-meeting.sh:
 meeting_buffer_time=$((current_time + 243))
 ```
 243 is four minutes and three seconds.  Adjust as needed, or add a PR to pull this value from a config file.
+
+## which Chrome window gets the meeting
+Meetings open as the account in gcalcli's `default-calendars` (override with
+`MEET_ACCOUNT`). `bin/open-in-chrome.sh` finds the Chrome window with a Gmail
+tab signed in as that account, preferring the one with the most Google tabs,
+opens the meeting there, and raises that window. If no window has that Gmail
+tab, it opens in that account's Chrome profile instead (looked up in Chrome's
+`Local State`).
+
+The first time this runs from launchd, macOS asks whether it can control Google
+Chrome. Allow it (System Settings > Privacy & Security > Automation). If you
+deny it, meetings still open in the right profile, but not in your chosen window.
+
+Check which window it would pick without opening anything:
+```
+DRY_RUN=1 bin/open-in-chrome.sh https://meet.google.com/xyz you@example.com
+```

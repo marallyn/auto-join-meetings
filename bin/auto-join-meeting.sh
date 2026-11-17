@@ -3,6 +3,11 @@
 GCALCLI_DIR="$HOME/Library/Application Support/gcalcli"
 MEETINGS_FILE="$GCALCLI_DIR/.meetings.json"
 JOINED_FILE="$GCALCLI_DIR/.meetings-joined"
+OPEN_IN_CHROME="$(dirname "$0")/open-in-chrome.sh"
+
+# The account whose calendar we fetch is the one that has to join. Override with
+# MEET_ACCOUNT if gcalcli's first default calendar isn't it.
+MEET_ACCOUNT="${MEET_ACCOUNT:-$(sed -nE 's/^default-calendars *= *\["([^"]+)".*/\1/p' "$GCALCLI_DIR/config.toml")}"
 
 touch "$JOINED_FILE"
 
@@ -20,7 +25,12 @@ jq -r '.meetings[] | "\(.time) \(.meet_link) \(.name)"' "$MEETINGS_FILE" 2>/dev/
         meeting_key="${today}_${meeting_time}_${meet_link}"
 
         if ! grep -q "$meeting_key" "$JOINED_FILE"; then
-            open "$meet_link"
+            if [[ -n "$MEET_ACCOUNT" ]]; then
+                # authuser picks the right login if the profile holds more than one account.
+                "$OPEN_IN_CHROME" "${meet_link}?authuser=${MEET_ACCOUNT}" "$MEET_ACCOUNT"
+            else
+                open "$meet_link"
+            fi
             echo "$meeting_key" >> "$JOINED_FILE"
 
             # Nearest whole minute. Anything under 30s reads as "now" rather than
